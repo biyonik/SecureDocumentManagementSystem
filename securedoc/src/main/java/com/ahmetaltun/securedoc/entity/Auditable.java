@@ -1,5 +1,6 @@
 package com.ahmetaltun.securedoc.entity;
 
+import com.ahmetaltun.securedoc.exception.ApiException;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
