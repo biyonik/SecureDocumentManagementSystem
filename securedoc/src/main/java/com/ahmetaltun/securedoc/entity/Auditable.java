@@ -1,5 +1,6 @@
 package com.ahmetaltun.securedoc.entity;
 
+import com.ahmetaltun.securedoc.domain.RequestContext;
 import com.ahmetaltun.securedoc.exception.ApiException;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -49,7 +50,7 @@ public abstract class Auditable {
 
     @PrePersist
     public void beforePersist() {
-        var userId = 1L;
+        var userId = RequestContext.getUserId();
         if (userId == null) {
             throw new ApiException("Cannot persist entity without User Id in RequestContext for this thread!");
         }
@@ -61,7 +62,7 @@ public abstract class Auditable {
 
     @PreUpdate
     public void beforeUpdate() {
-        var userId = 1L;
+        var userId = RequestContext.getUserId();
         if (userId == null) {
             throw new ApiException("Cannot updated entity without User Id in RequestContext for this thread!");
         }
