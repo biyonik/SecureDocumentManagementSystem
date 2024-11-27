@@ -63,5 +63,5 @@ public class UserEntity extends Auditable {
                     referencedColumnName = "id"
             )
     )
-    private RoleEntity roles;
+    private RoleEntity role;
 }
