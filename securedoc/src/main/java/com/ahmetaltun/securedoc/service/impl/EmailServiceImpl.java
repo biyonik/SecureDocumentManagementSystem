@@ -31,7 +31,7 @@ public class EmailServiceImpl implements IEmailService {
 
     @Value("${spring.mail.verify.host}")
     private String host;
-    @Value("${spring.mail.verify.username}")
+    @Value("${spring.mail.username}")
     private String fromEmail;
 
     @Override
