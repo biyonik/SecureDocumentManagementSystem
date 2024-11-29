@@ -1,4 +1,4 @@
-package com.ahmetaltun.securedoc.dtorequest;
+package com.ahmetaltun.securedoc.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.*;

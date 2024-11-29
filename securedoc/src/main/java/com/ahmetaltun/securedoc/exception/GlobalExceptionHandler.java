@@ -1,19 +1,18 @@
 package com.ahmetaltun.securedoc.exception;
 
-import com.ahmetaltun.securedoc.domain.Response;
-import com.ahmetaltun.securedoc.utils.RequestUtils;
+import com.ahmetaltun.securedoc.domain.response.ApiResponseType;
+import com.ahmetaltun.securedoc.domain.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Ahmet Altun
@@ -26,57 +25,56 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Response> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
+    public ResponseEntity<ApiResponseType> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(RequestUtils.errorResponse(
-                        request,
+                .body(ErrorResponse.of(
+                        request.getRequestURI(),
                         HttpStatus.NOT_FOUND,
                         ex.getMessage(),
                         ex.getClass().getSimpleName(),
-                        new HashMap<>()
+                        Map.of()
                 ));
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Response> handleValidation(ValidationException ex, HttpServletRequest request) {
-        System.out.println(ex.getMessage());
+    public ResponseEntity<ApiResponseType> handleValidation(ValidationException ex, HttpServletRequest request) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(RequestUtils.errorResponse(
-                        request,
+                .body(ErrorResponse.of(
+                        request.getRequestURI(),
                         HttpStatus.BAD_REQUEST,
                         ex.getMessage(),
                         ex.getClass().getSimpleName(),
-                        new HashMap<>()
+                        Map.of()
                 ));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Response> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        // Hataları field bazlı gruplayalım
-        Map<String, List<String>> validationErrors = new HashMap<>();
-
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            String fieldName = error.getField();
-            String errorMessage = error.getDefaultMessage();
-
-            validationErrors.computeIfAbsent(fieldName, k -> new ArrayList<>())
-                    .add(errorMessage);
-        });
-
-        // Daha zengin bir hata yanıtı oluşturalım
-        Map<String, Object> errorDetails = new HashMap<>();
-        errorDetails.put("validationErrors", validationErrors);
-        errorDetails.put("errorCount", validationErrors.values()
+    public ResponseEntity<ApiResponseType> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        Map<String, List<String>> validationErrors = ex.getBindingResult()
+                .getFieldErrors()
                 .stream()
-                .mapToInt(List::size)
-                .sum());
+                .collect(Collectors.groupingBy(
+                        FieldError::getField,
+                        Collectors.mapping(
+                                FieldError::getDefaultMessage,
+                                Collectors.toList()
+                        )
+                ));
+
+        Map<String, Object> errorDetails = Map.of(
+                "validationErrors", validationErrors,
+                "errorCount", validationErrors.values()
+                        .stream()
+                        .mapToInt(List::size)
+                        .sum()
+        );
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(RequestUtils.errorResponse(
-                        request,
+                .body(ErrorResponse.of(
+                        request.getRequestURI(),
                         HttpStatus.BAD_REQUEST,
                         "Validation failed",
                         ex.getClass().getSimpleName(),
@@ -85,28 +83,31 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Response> handleGeneral(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<ApiResponseType> handleGeneral(Exception ex, HttpServletRequest request) {
+        String message = Optional.ofNullable(ex.getMessage())
+                .orElse("M: " + ex.getClass().getSimpleName());
+
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(RequestUtils.errorResponse(
-                        request,
+                .body(ErrorResponse.of(
+                        request.getRequestURI(),
                         HttpStatus.INTERNAL_SERVER_ERROR,
-                        ex.getMessage() == null ? "M: "+ex.getClass().getSimpleName() : ex.getMessage(),
+                        message,
                         ex.getClass().getSimpleName(),
-                        new HashMap<>()
+                        Map.of()
                 ));
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Response> handleNotFound(NotFoundException ex, HttpServletRequest request) {
+    public ResponseEntity<ApiResponseType> handleNotFound(NotFoundException ex, HttpServletRequest request) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(RequestUtils.errorResponse(
-                        request,
+                .body(ErrorResponse.of(
+                        request.getRequestURI(),
                         HttpStatus.NOT_FOUND,
                         ex.getMessage(),
                         ex.getClass().getSimpleName(),
-                        new HashMap<>()
+                        Map.of()
                 ));
     }
 }
