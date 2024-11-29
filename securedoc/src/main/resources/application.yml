@@ -28,10 +28,12 @@ spring:
         format_sql: true
   sql:
     init:
-      mode: always
-      continue-on-error: false
+      mode: never
+      continue-on-error: true
       schema-locations: classpath:/data/schema.sql
       data-locations: classpath:/data/data.sql
+      separator: ;
+      encoding: UTF-8
   servlet:
     multipart:
       enabled: true

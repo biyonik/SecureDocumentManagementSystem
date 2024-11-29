@@ -20,7 +20,8 @@ public record Response(
         HttpStatus status,
         String message,
         String exception,
-        Map<String, Object> data
+        Map<String, Object> data,
+        Map<String, Object> errors
 ) {
     public static Response success(String path, String message, Map<String, Object> data) {
         return new Response(
@@ -30,11 +31,18 @@ public record Response(
                 HttpStatus.OK,
                 message,
                 null,
-                data
+                data,
+                null
         );
     }
 
-    public static Response error(String path, HttpStatus status, String message, String exception) {
+    public static Response error(
+            String path,
+            HttpStatus status,
+            String message,
+            String exception,
+            Map<String, Object> errorDetails) {
+
         return new Response(
                 LocalDateTime.now().toString(),
                 status.value(),
@@ -42,7 +50,8 @@ public record Response(
                 status,
                 message,
                 exception,
-                null
+                null,
+                errorDetails
         );
     }
 
@@ -59,6 +68,7 @@ public record Response(
         private String message;
         private String exception;
         private Map<String, Object> data;
+        private Map<String, Object> errors;
 
         public ResponseBuilder code(int code) {
             this.code = code;
@@ -90,8 +100,13 @@ public record Response(
             return this;
         }
 
+        public ResponseBuilder errors(Map<String, Object> errors) {
+            this.errors = errors;
+            return this;
+        }
+
         public Response build() {
-            return new Response(time, code, path, status, message, exception, data);
+            return new Response(time, code, path, status, message, exception, data, errors);
         }
     }
 }

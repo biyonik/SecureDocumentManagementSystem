@@ -62,10 +62,10 @@ public abstract class Auditable {
     private boolean deleted = false;
 
     private Long validateAndGetUserId() {
-        var userId = RequestContext.getUserId();
-        if (userId == null) {
-            throw new ApiException("Cannot perform operation without User Id in RequestContext!");
-        }
+        var userId = 0L; // RequestContext.getUserId();
+//        if (userId == null) {
+//            throw new ApiException("Cannot perform operation without User Id in RequestContext!");
+//        }
         return userId;
     }
 

@@ -29,12 +29,19 @@ public class RequestUtils {
         );
     }
 
-    public static Response errorResponse(HttpServletRequest request, HttpStatus status, String message, String exception) {
+    public static Response errorResponse(
+            HttpServletRequest request,
+            HttpStatus status,
+            String message,
+            String exception,
+            Map<String, Object> errorDetails) {
+
         return Response.error(
                 request.getRequestURI(),
                 status,
                 message,
-                exception
+                exception,
+                errorDetails
         );
     }
 }

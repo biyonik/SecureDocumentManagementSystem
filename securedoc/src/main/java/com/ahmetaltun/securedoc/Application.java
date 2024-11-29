@@ -24,17 +24,17 @@ public class Application {
 	CommandLineRunner commandLineRunner(IRoleRepository roleRepository) {
 		return args -> {
 			RequestContext.setUserId(0L);
-			var userRole = new RoleEntity();
-			userRole.setName(Authority.USER.name());
-			userRole.setAuthorities(Authority.USER);
-			roleRepository.save(userRole);
-
-			var adminRole = new RoleEntity();
-			adminRole.setName(Authority.ADMIN.name());
-			adminRole.setAuthorities(Authority.ADMIN);
-			roleRepository.save(adminRole);
-
-			RequestContext.start();
+//			var userRole = new RoleEntity();
+//			userRole.setName(Authority.USER.name());
+//			userRole.setAuthorities(Authority.USER);
+//			roleRepository.save(userRole);
+//
+//			var adminRole = new RoleEntity();
+//			adminRole.setName(Authority.ADMIN.name());
+//			adminRole.setAuthorities(Authority.ADMIN);
+//			roleRepository.save(adminRole);
+//
+//			RequestContext.start();
 		};
 	}
 
