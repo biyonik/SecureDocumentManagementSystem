@@ -3,6 +3,7 @@ package com.ahmetaltun.securedoc.domain;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
@@ -12,5 +13,85 @@ import java.util.Map;
  * @since 27/11/2024
  */
 
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
-public record Response(String time, int code, String path, HttpStatus status, String message, String exception, Map<?, ?> data) { }
+public record Response(
+        String time,
+        int code,
+        String path,
+        HttpStatus status,
+        String message,
+        String exception,
+        Map<String, Object> data
+) {
+    public static Response success(String path, String message, Map<String, Object> data) {
+        return new Response(
+                LocalDateTime.now().toString(),
+                HttpStatus.OK.value(),
+                path,
+                HttpStatus.OK,
+                message,
+                null,
+                data
+        );
+    }
+
+    public static Response error(String path, HttpStatus status, String message, String exception) {
+        return new Response(
+                LocalDateTime.now().toString(),
+                status.value(),
+                path,
+                status,
+                message,
+                exception,
+                null
+        );
+    }
+
+    public static ResponseBuilder builder() {
+        return new ResponseBuilder();
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class ResponseBuilder {
+        private final String time = LocalDateTime.now().toString();
+        private int code;
+        private String path;
+        private HttpStatus status;
+        private String message;
+        private String exception;
+        private Map<String, Object> data;
+
+        public ResponseBuilder code(int code) {
+            this.code = code;
+            return this;
+        }
+
+        public ResponseBuilder path(String path) {
+            this.path = path;
+            return this;
+        }
+
+        public ResponseBuilder status(HttpStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public ResponseBuilder message(String message) {
+            this.message = message;
+            return this;
+        }
+
+        public ResponseBuilder exception(String exception) {
+            this.exception = exception;
+            return this;
+        }
+
+        public ResponseBuilder data(Map<String, Object> data) {
+            this.data = data;
+            return this;
+        }
+
+        public Response build() {
+            return new Response(time, code, path, status, message, exception, data);
+        }
+    }
+}

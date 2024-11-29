@@ -2,7 +2,8 @@ package com.ahmetaltun.securedoc.resource;
 
 import com.ahmetaltun.securedoc.domain.Response;
 import com.ahmetaltun.securedoc.dtorequest.UserRequest;
-import com.ahmetaltun.securedoc.service.impl.UserService;
+import com.ahmetaltun.securedoc.service.impl.UserServiceImpl;
+import com.ahmetaltun.securedoc.utils.RequestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
-
-import static com.ahmetaltun.securedoc.utils.RequestUtils.getResponse;
-import static java.util.Collections.emptyMap;
-import static org.springframework.http.HttpStatus.CREATED;
+import java.util.Map;
 
 /**
  * @author Ahmet Altun
@@ -28,19 +26,20 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = {"/user"})
+@RequestMapping("/user")
 public class UserResource {
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     @PostMapping("/register")
-    public ResponseEntity<Response> saveUser(@RequestBody @Valid UserRequest user, HttpServletRequest request) {
+    public ResponseEntity<Response> register(@RequestBody @Valid UserRequest user, HttpServletRequest request) {
         userService.createUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword());
-        return ResponseEntity
-                .created(getUri())
-                .body(getResponse(request, emptyMap(), "Account created. Check your email to enable your account", CREATED));
-    }
 
-    private URI getUri() {
-        return URI.create("");
+        return ResponseEntity
+                .created(URI.create("/user/" + user.getEmail()))
+                .body(RequestUtils.successResponse(
+                        request,
+                        Map.of("email", user.getEmail()),
+                        "Account created. Check your email to enable your account"
+                ));
     }
 }

@@ -8,6 +8,7 @@ import com.ahmetaltun.securedoc.enumeration.Authority;
 import com.ahmetaltun.securedoc.enumeration.EventType;
 import com.ahmetaltun.securedoc.event.UserEvent;
 import com.ahmetaltun.securedoc.exception.ApiException;
+import com.ahmetaltun.securedoc.exception.NotFoundException;
 import com.ahmetaltun.securedoc.repository.IConfirmationRepository;
 import com.ahmetaltun.securedoc.repository.ICredentialRepository;
 import com.ahmetaltun.securedoc.repository.IRoleRepository;
@@ -34,7 +35,7 @@ import static com.ahmetaltun.securedoc.utils.UserUtils.createUserEntity;
 @Transactional(rollbackOn = Exception.class)
 @RequiredArgsConstructor
 @Slf4j
-public class UserService implements IUserService {
+public class UserServiceImpl implements IUserService {
 
     private final IUserRepository userRepository;
     private final IRoleRepository roleRepository;
@@ -56,7 +57,7 @@ public class UserService implements IUserService {
     @Override
     public RoleEntity getRoleName(String name) {
         var role = roleRepository.findByNameIgnoreCase(name);
-        return role.orElseThrow(() -> new ApiException("Role not found!"));
+        return role.orElseThrow(() -> new NotFoundException("Role not found!"));
     }
 
     private UserEntity createNewUser(String firstName, String lastName, String email) {

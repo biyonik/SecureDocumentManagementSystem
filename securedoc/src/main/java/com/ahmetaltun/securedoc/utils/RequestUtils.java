@@ -17,15 +17,24 @@ import java.util.Map;
 
 
 public class RequestUtils {
-    public static Response getResponse(HttpServletRequest request, Map<?, ?> data, String message, HttpStatus status) {
-        return new Response(
-                LocalDateTime.now().toString(),
-                status.value(),
+    private RequestUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    public static Response successResponse(HttpServletRequest request, Map<String, Object> data, String message) {
+        return Response.success(
                 request.getRequestURI(),
-                HttpStatus.valueOf(status.value()),
                 message,
-                Strings.EMPTY,
                 data
+        );
+    }
+
+    public static Response errorResponse(HttpServletRequest request, HttpStatus status, String message, String exception) {
+        return Response.error(
+                request.getRequestURI(),
+                status,
+                message,
+                exception
         );
     }
 }

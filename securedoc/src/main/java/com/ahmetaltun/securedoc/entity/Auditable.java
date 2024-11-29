@@ -8,10 +8,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.util.AlternativeJdkIdGenerator;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * @author Ahmet Altun
@@ -31,7 +32,9 @@ public abstract class Auditable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "primary_key_seq")
     @Column(name="id", updatable = false, nullable = false)
     private Long id;
-    private String referenceId = new AlternativeJdkIdGenerator().generateId().toString();
+
+    @Column(nullable = false)
+    private String referenceId = UUID.randomUUID().toString();
 
     @NotNull
     private Long createdBy;
@@ -44,28 +47,34 @@ public abstract class Auditable {
     @Column(name="created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @CreatedDate
+    @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @PrePersist
-    public void beforePersist() {
+    @Version
+    private Long version;
+
+    private Long validateAndGetUserId() {
         var userId = RequestContext.getUserId();
         if (userId == null) {
-            throw new ApiException("Cannot persist entity without User Id in RequestContext for this thread!");
+            throw new ApiException("Cannot perform operation without User Id in RequestContext!");
         }
-        setCreatedAt(LocalDateTime.now());
+        return userId;
+    }
+
+    @PrePersist
+    public void beforePersist() {
+        var userId = validateAndGetUserId();
+        LocalDateTime now = LocalDateTime.now();
+        setCreatedAt(now);
+        setUpdatedAt(now);
         setCreatedBy(userId);
         setUpdatedBy(userId);
-        setUpdatedAt(LocalDateTime.now());
     }
 
     @PreUpdate
     public void beforeUpdate() {
-        var userId = RequestContext.getUserId();
-        if (userId == null) {
-            throw new ApiException("Cannot updated entity without User Id in RequestContext for this thread!");
-        }
+        var userId = validateAndGetUserId();
         setUpdatedBy(userId);
         setUpdatedAt(LocalDateTime.now());
     }
