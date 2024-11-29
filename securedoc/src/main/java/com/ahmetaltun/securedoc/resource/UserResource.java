@@ -2,6 +2,7 @@ package com.ahmetaltun.securedoc.resource;
 
 import com.ahmetaltun.securedoc.domain.Response;
 import com.ahmetaltun.securedoc.dtorequest.UserRequest;
+import com.ahmetaltun.securedoc.service.IUserService;
 import com.ahmetaltun.securedoc.service.impl.UserServiceImpl;
 import com.ahmetaltun.securedoc.utils.RequestUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +29,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/user")
 public class UserResource {
-    private final UserServiceImpl userService;
+    private final IUserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<Response> register(@RequestBody @Valid UserRequest user, HttpServletRequest request) {

@@ -2,7 +2,6 @@ package com.ahmetaltun.securedoc.repository;
 
 import com.ahmetaltun.securedoc.entity.ConfirmationEntity;
 import com.ahmetaltun.securedoc.entity.UserEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -15,7 +14,7 @@ import java.util.Optional;
  */
 
 @Repository
-public interface IConfirmationRepository extends JpaRepository<ConfirmationEntity, Long> {
+public interface IConfirmationRepository extends BaseRepository<ConfirmationEntity> {
     Optional<ConfirmationEntity> findByKey(String key);
     Optional<ConfirmationEntity> findByUserEntity(UserEntity userEntity);
 }

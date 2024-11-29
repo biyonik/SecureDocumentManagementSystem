@@ -25,12 +25,12 @@ import java.util.UUID;
 @Setter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, allowGetters = true)
+@JsonIgnoreProperties(value = {"createdAt", "updatedAt", "deletedAt"}, allowGetters = true)
 public abstract class Auditable {
     @Id
     @SequenceGenerator(name = "primary_key_seq", sequenceName = "primary_key_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "primary_key_seq")
-    @Column(name="id", updatable = false, nullable = false)
+    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
     @Column(nullable = false)
@@ -39,20 +39,27 @@ public abstract class Auditable {
     @NotNull
     private Long createdBy;
 
-    @NotNull
     private Long updatedBy;
+
+    private Long deletedBy;
 
     @NotNull
     @CreatedDate
-    @Column(name="created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @Version
     private Long version;
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 
     private Long validateAndGetUserId() {
         var userId = RequestContext.getUserId();
@@ -65,17 +72,32 @@ public abstract class Auditable {
     @PrePersist
     public void beforePersist() {
         var userId = validateAndGetUserId();
-        LocalDateTime now = LocalDateTime.now();
-        setCreatedAt(now);
-        setUpdatedAt(now);
+        setCreatedAt(LocalDateTime.now());
         setCreatedBy(userId);
-        setUpdatedBy(userId);
     }
 
     @PreUpdate
     public void beforeUpdate() {
+        if (!deleted) {
+            var userId = validateAndGetUserId();
+            setUpdatedBy(userId);
+            setUpdatedAt(LocalDateTime.now());
+        }
+    }
+
+    public void softDelete() {
         var userId = validateAndGetUserId();
-        setUpdatedBy(userId);
-        setUpdatedAt(LocalDateTime.now());
+        this.deleted = true;
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = userId;
+    }
+
+    public void restore() {
+        var userId = validateAndGetUserId();
+        this.deleted = false;
+        this.deletedAt = null;
+        this.deletedBy = null;
+        this.updatedAt = LocalDateTime.now();
+        this.updatedBy = userId;
     }
 }
