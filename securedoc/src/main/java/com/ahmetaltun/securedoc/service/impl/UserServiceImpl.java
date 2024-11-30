@@ -9,6 +9,7 @@ import com.ahmetaltun.securedoc.enumeration.EventType;
 import com.ahmetaltun.securedoc.event.UserEvent;
 import com.ahmetaltun.securedoc.exception.ApiException;
 import com.ahmetaltun.securedoc.exception.NotFoundException;
+import com.ahmetaltun.securedoc.exception.ServiceException;
 import com.ahmetaltun.securedoc.repository.IConfirmationRepository;
 import com.ahmetaltun.securedoc.repository.ICredentialRepository;
 import com.ahmetaltun.securedoc.repository.IRoleRepository;
@@ -18,9 +19,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static com.ahmetaltun.securedoc.utils.UserUtils.createUserEntity;
 
@@ -58,6 +61,23 @@ public class UserServiceImpl implements IUserService {
     public RoleEntity getRoleName(String name) {
         var role = roleRepository.findByNameIgnoreCase(name);
         return role.orElseThrow(() -> new NotFoundException("Role not found!"));
+    }
+
+    @Override
+    public void verifyAccount(String key) {
+        ConfirmationEntity confirmation = confirmationRepository.findByKey(key)
+                .orElseThrow(() -> new NotFoundException("Confirmation", "key", key));
+
+        UserEntity user = Optional.ofNullable(confirmation.getUserEntity())
+                .orElseThrow(() -> new NotFoundException("User not found for confirmation key: " + key));
+
+        try {
+            user.setEnabled(true);
+            userRepository.save(user);
+            confirmationRepository.delete(confirmation);
+        } catch (DataAccessException e) {
+            throw new ServiceException("Failed to verify account", e);
+        }
     }
 
     private UserEntity createNewUser(String firstName, String lastName, String email) {

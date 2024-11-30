@@ -110,4 +110,30 @@ public class GlobalExceptionHandler {
                         Map.of()
                 ));
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponseType> handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of(
+                        request.getRequestURI(),
+                        HttpStatus.BAD_REQUEST,
+                        ex.getMessage(),
+                        ex.getClass().getSimpleName(),
+                        Map.of()
+                ));
+    }
+
+    @ExceptionHandler(ServiceException.class)
+    public ResponseEntity<ApiResponseType> handleServiceException(ServiceException ex, HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of(
+                        request.getRequestURI(),
+                        HttpStatus.BAD_REQUEST,
+                        ex.getMessage(),
+                        ex.getClass().getSimpleName(),
+                        Map.of()
+                ));
+    }
 }

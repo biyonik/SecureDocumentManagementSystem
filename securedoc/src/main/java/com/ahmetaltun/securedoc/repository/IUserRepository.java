@@ -16,4 +16,6 @@ import java.util.Optional;
 public interface IUserRepository extends BaseRepository<UserEntity> {
     Optional<UserEntity> findByEmailIgnoreCase(String email);
     Optional<UserEntity> findUserByUserId(String userId);
+
+    UserEntity findUserEntityByEmail(String email);
 }

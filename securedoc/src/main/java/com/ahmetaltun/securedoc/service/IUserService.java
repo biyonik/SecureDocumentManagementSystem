@@ -13,4 +13,5 @@ import com.ahmetaltun.securedoc.entity.RoleEntity;
 public interface IUserService {
     void createUser(String firstName, String lastName, String email, String password);
     RoleEntity getRoleName(String name);
+    void verifyAccount(String key);
 }
