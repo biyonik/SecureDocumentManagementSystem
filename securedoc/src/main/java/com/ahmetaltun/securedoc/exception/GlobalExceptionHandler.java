@@ -136,4 +136,17 @@ public class GlobalExceptionHandler {
                         Map.of()
                 ));
     }
+
+    @ExceptionHandler(UnsupportedOperationException.class)
+    public ResponseEntity<ApiResponseType> handleUnsupportedOperationException(UnsupportedOperationException ex, HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of(
+                        request.getRequestURI(),
+                        HttpStatus.BAD_REQUEST,
+                        ex.getMessage(),
+                        ex.getClass().getSimpleName(),
+                        Map.of()
+                ));
+    }
 }
